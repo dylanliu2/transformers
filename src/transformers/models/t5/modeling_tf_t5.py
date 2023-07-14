@@ -570,7 +570,7 @@ class TFT5Block(tf.keras.layers.Layer):
             self_attn_past_key_value, cross_attn_past_key_value = None, None
 
         if self.before_encoder_block is not None:
-            hidden_states = self.before_encoder_block(hidden_states)
+            hidden_states2 = self.before_encoder_block(hidden_states)
             
         self_attention_outputs = self.layer[0](
             hidden_states,
@@ -615,6 +615,8 @@ class TFT5Block(tf.keras.layers.Layer):
 
         # Apply Feed Forward layer
         hidden_states = self.layer[-1](hidden_states, training=training)
+        if self.before_encoder_block is not None:
+            hidden_states += hidden_states2
         outputs = (hidden_states,)
 
         # Add attentions if we output them
