@@ -1134,7 +1134,7 @@ num_heads))`.
     T5_START_DOCSTRING,
 )
 class TFT5Model(TFT5PreTrainedModel):
-    def __init__(self, config, before_encoder_block=None, *inputs, **kwargs):
+    def __init__(self, config, before_encoder_block=None, decoders=None, decode_dim=None, *inputs, **kwargs):
         super().__init__(config, *inputs, **kwargs)
 
         self.shared = tf.keras.layers.Embedding(
@@ -1150,10 +1150,14 @@ class TFT5Model(TFT5PreTrainedModel):
         encoder_config.use_cache = False
         self.encoder = TFT5MainLayer(encoder_config, self.shared, before_encoder_block, name="encoder")
 
-        decoder_config = copy.deepcopy(config)
-        decoder_config.is_decoder = True
-        decoder_config.num_layers = config.num_decoder_layers
-        self.decoder = TFT5MainLayer(decoder_config, self.shared, name="decoder")
+        self.decode_dim = decode_dim
+        if decoders is not None:
+            self.decoder = decoders
+        else:
+            decoder_config = copy.deepcopy(config)
+            decoder_config.is_decoder = True
+            decoder_config.num_layers = config.num_decoder_layers
+            self.decoder = TFT5MainLayer(decoder_config, self.shared, name="decoder")
 
     def get_encoder(self):
         return self.encoder
@@ -1229,6 +1233,8 @@ class TFT5Model(TFT5PreTrainedModel):
             )
 
         hidden_states = encoder_outputs[0]
+        if self.decode_dim is not None:
+            hidden_states = hidden_states[:, :, -self.decode_dim:]
 
         # Decode
         decoder_outputs = self.decoder(
