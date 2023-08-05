@@ -630,13 +630,14 @@ class TFT5Block(tf.keras.layers.Layer):
 class TFT5MainLayer(tf.keras.layers.Layer):
     config_class = T5Config
 
-    def __init__(self, config, embed_tokens=None, before_encoder_block=None, **kwargs):
+    def __init__(self, config, embed_tokens=None, before_encoder_block=None, is_final=True, **kwargs):
         super().__init__(**kwargs)
 
         self.config = config
         self.output_hidden_states = config.output_hidden_states
         self.output_attentions = config.output_attentions
         self.use_cache = config.use_cache
+        self.is_final = is_final
 
         self.embed_tokens = embed_tokens
         self.is_decoder = config.is_decoder
@@ -828,8 +829,9 @@ class TFT5MainLayer(tf.keras.layers.Layer):
                 if self.is_decoder:
                     all_cross_attentions = all_cross_attentions + (layer_outputs[5],)
 
-        hidden_states = self.final_layer_norm(hidden_states)
-        hidden_states = self.dropout(hidden_states, training=training)
+        if self.is_final:
+            hidden_states = self.final_layer_norm(hidden_states)
+            hidden_states = self.dropout(hidden_states, training=training)
 
         # Add last layer
         if output_hidden_states:
@@ -1539,7 +1541,7 @@ class TFT5ForConditionalGeneration(TFT5PreTrainedModel, TFCausalLanguageModeling
     T5_START_DOCSTRING,
 )
 class TFT5EncoderModel(TFT5PreTrainedModel):
-    def __init__(self, config, *inputs, **kwargs):
+    def __init__(self, config, is_final=True, *inputs, **kwargs):
         super().__init__(config, *inputs, **kwargs)
         self.shared = tf.keras.layers.Embedding(
             config.vocab_size,
@@ -1552,7 +1554,7 @@ class TFT5EncoderModel(TFT5PreTrainedModel):
 
         encoder_config = copy.deepcopy(config)
         encoder_config.use_cache = False
-        self.encoder = TFT5MainLayer(encoder_config, self.shared, name="encoder")
+        self.encoder = TFT5MainLayer(encoder_config, self.shared, name="encoder", is_final=is_final)
 
     @property
     def dummy_inputs(self):
