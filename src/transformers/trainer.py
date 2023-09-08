@@ -988,7 +988,7 @@ class Trainer:
                         })
 
             if self.args.lr_decay != 1:
-                lr = self.arg.learning_rate
+                lr = self.args.learning_rate
                 for param in optimizer_grouped_parameters[::-1]:
                     param["lr"] = lr
                     lr *= self.args.lr_decay
