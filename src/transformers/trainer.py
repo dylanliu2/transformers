@@ -974,18 +974,14 @@ class Trainer:
             for n, p in opt_model.named_parameters():
                 if (n in decay_parameters and p.requires_grad):
                     optimizer_grouped_parameters.append({
-                        "params": [
-                            p for n, p in opt_model.named_parameters() if (n in decay_parameters and p.requires_grad)
-                        ],
+                        "params": p,
                         "weight_decay": self.args.weight_decay,
                     })
                 if (n not in decay_parameters and p.requires_grad):
-                        optimizer_grouped_parameters.append({
-                            "params": [
-                                p for n, p in opt_model.named_parameters() if (n in decay_parameters and p.requires_grad)
-                            ],
-                            "weight_decay": self.args.weight_decay,
-                        })
+                    optimizer_grouped_parameters.append({
+                        "params": p,
+                        "weight_decay": 0
+                    })
 
             if self.args.lr_decay != 1:
                 lr = self.args.learning_rate
