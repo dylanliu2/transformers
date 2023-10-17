@@ -568,7 +568,7 @@ class LlamaModel(LlamaPreTrainedModel):
         use_cache = use_cache if use_cache is not None else self.config.use_cache
 
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
-        print("inputs_embeds.shape2:", inputs_embeds.shape)
+        #print("inputs_embeds.shape2:", inputs_embeds.shape)
         # retrieve input_ids and inputs_embeds
         if input_ids is not None and inputs_embeds is not None:
             raise ValueError("You cannot specify both decoder_input_ids and decoder_inputs_embeds at the same time")
@@ -755,7 +755,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
         # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
-        print("inputs_embeds.shape1:", inputs_embeds.shape)
+        #print("inputs_embeds.shape1:", inputs_embeds.shape)
         outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
